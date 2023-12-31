@@ -1,63 +1,50 @@
 import os
 import json
 import requests
-
+import time
+from dotenv import load_dotenv
+import logging
 
 from web3 import Web3
-#from etherscan import EtherscanProvider
+from etherscan import Etherscan
 
-provider = ''
-w3 = Web3(Web3.HTTPProvider())
-#w3 = Web3(provider=provider)
-contract_address = w3.to_checksum_address('0xaBe235136562a5C2B02557E1caE7E8c85F2a5DA0')
+load_dotenv()
+
 CONTRACT_ADDR = os.getenv("CONTRACT_ADDRESS")
 API_KEY = os.getenv("ETHSCAN_API_TOKEN")
+TOPIC = os.getenv("TOPIC")
 
-def get_contract_abi(): 
-    #url = f"https://api.etherscan.io/api"
-    #response = requests.get(url, params={'module':'contract','action':'getabi','address':CONTRACT_ADDR,'apikey':API_KEY}).json()
-    url = f'https://api.etherscan.io/api?module=contract&action=getabi&address=0xaBe235136562a5C2B02557E1caE7E8c85F2a5DA0'
-    response = requests.get(url).json()
-    #print(response)
-    abi = response.get('result') or []
-    return abi
+logging.basicConfig(level=logging.WARNING)
+logger = logging.getLogger(__name__)
 
-abi=get_contract_abi()
+w3 = Web3(Web3.HTTPProvider(f'https://api.zmok.io/mainnet/{os.getenv("API_KEY_ZMOK")}'))
+contract_address = w3.to_checksum_address(CONTRACT_ADDR)
+eth = Etherscan(API_KEY)
 
-contract = w3.eth.contract(address=CONTRACT_ADDR, abi=abi)
+def get_balance(request: list):
 
-def get_contract_events(startblock, endblock): 
-    #First get txIDs for last 24 hours
+    balance = eth.get_eth_balance(contract_addresses))
 
-    #then for every ID request and get last element 
-    url = f"https://api.etherscan.io/api?module=proxy&action=eth_getTransactionReceipt&txhash=0x0dfd460ff10de202be107c804137c0c0d36ada2b5dc687ff001885a2330c33c6"
-    response = requests.get(url).json()
-    logs = response.get('result') or []
-    #Accumulate the logs for the transactions
-    return logs
+def get_transaction_24h():
+    # Set up the parameters for the call to getTransactionCount
+    period = 86400  # 24 hours in seconds
+    timestamp = int(time.time())-period
+    try:
+        from_block = eth.get_block_number_by_timestamp(timestamp=timestamp,closest='after')
+        url=f'https://api.etherscan.io/api?module=logs&action=getLogs&address={contract_address}&topic0={TOPIC}&fromBlock={from_block}&page=1&apikey={API_KEY}'
+        response = requests.get(url)
+        #print(response)
+        resp = response.json().get('result') or []
+        return resp
+    except:
+        logger.error('Unable to process the query from the API.')
+        return []
 
-def parse_total_distribution_logs(logs):
-    total_dict = {
-        'processed': {'value': 0},
-        'distributed': {'value': 0},
-        'bought': {'value': 0},
-        'distributed_eth': {'value': 0}
-    }
 
-    #parsing logic
+transactions = get_transaction_24h()
+for txn in transactions:
+    print(f"{txn['hash']} ({txn['timeStamp']})")
 
-    return total_dict
-
-def get_events():
-    start_block = ... # start block time
-    end_block = int(time.time() / 15) * 15 + 60*15 - 24*60*60
-    event_filter = get_all_entries() #some function to get IDs
-    logs = get_contract_events(event_filter)
-    return logs
-
-print(w3, contract_address)
-print(contract.events.TotalDistribution())
-if __name__ == '_main__':
-    #logs=getevents() 
-    #print(logs)
-    print(w3, contract_address)
+def get_event_logs(txs):
+    event=[]
+    return event
