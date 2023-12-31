@@ -1,4 +1,6 @@
 from datetime import datetime
+from web3 import Web3
+
 def get_results(data: list)->dict:
 
     first_tx=datetime.fromtimestamp(int(data[0]['timeStamp'],16))
@@ -25,13 +27,14 @@ def get_results(data: list)->dict:
         }
 
 def build_report(stats):
+    
     report = f"📊 Daily $AIX Stats:\n\n" \
              f"- First TX: {str(stats['first_tx'])} Ago\n" \
              f"- Last TX: {str(stats['last_tx'])} Ago\n\n" \
              f"- AIX processed: {stats['results'][-1]['inputAixAmount']:,.2f}\n" \
              f"- AIX distributed: {stats['results'][-1]['distributedAixAmount']:,.2f}\n" \
-             f"- ETH bought: {stats['results'][-1]['swappedEthAmount']:,.4f}\n" \
-             f"- ETH distributed: {stats['results'][-1]['swappedEthAmount']:,.4f}\n\n" \
+             f"- ETH bought: {Web3.from_wei(int(stats['results'][-1]['swappedEthAmount']), 'ether') :,.4f}\n" \
+             f"- ETH distributed: {Web3.from_wei(int(stats['results'][-1]['distributedEthAmount']), 'ether') :,.4f}\n\n" \
              f"👛 Distributor wallet: {stats['distributors_account']}\n" \
              f"💠 Distributor balance: {stats['distributors_balance']} ETH\n\n"
     return report
