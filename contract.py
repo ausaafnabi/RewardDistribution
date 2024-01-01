@@ -8,7 +8,7 @@ import logging
 import web3
 from web3 import Web3
 from etherscan import Etherscan
-
+from connection import insert_logs_into_db, get_data_daily_report_aggregated
 from helper import get_results, build_report
 
 load_dotenv()
@@ -76,9 +76,24 @@ def generate_report():
     processed_data=get_results(data)
     #distributors_balance = get_balance(processed_data['results'])
     distributors_balance = get_balance_distributor()
-    processed_data['distributors_balance'] = distributors_balance
+    processed_data['distributors_balance'] = float(distributors_balance)
     processed_data['distributors_account'] = DISTRIBUTOR_ACCOUNT
+    insert_logs_into_db(processed_data)
     return build_report(processed_data)
 
+def generate_agg_report():
+    data=get_data_daily_report_aggregated()
+    stats = {'first_tx':data[0],
+             'last_tx':data[1],
+             'distributors_account': DISTRIBUTOR_ACCOUNT,
+             'distributors_balance': float(get_balance_distributor()),
+             'results':[{'inputAixAmount':data[2],
+                         'distributedAixAmount':data[3],
+                         'swappedEthAmount':data[4],
+                         'distributedEthAmount':data[5],
+                         }]
+            }
+    return build_report(stats)
+
 #transactions = get_transaction_24h()
-print(generate_report())
+#print(generate_agg_report())

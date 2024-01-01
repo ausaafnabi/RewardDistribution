@@ -14,10 +14,13 @@ def get_results(data: list)->dict:
         n = len(aix_eth_distibution)//4 # chunk length
         chunks = [int(aix_eth_distibution[j:j+n],16) for j in range(0, len(aix_eth_distibution), n)]
         report = {  'transactionHash' : i['transactionHash'],
-                    'inputAixAmount' : chunks[0],
-                    'distributedAixAmount' : chunks[1],
-                    'swappedEthAmount' :chunks[2],
-                    'distributedEthAmount' :chunks[3],
+                    'inputAixAmount' : round(float(Web3.from_wei(chunks[0], 'ether')),18),
+                    'distributedAixAmount' : round(float(Web3.from_wei(chunks[1], 'ether')),18),
+                    'swappedEthAmount' : round(float(Web3.from_wei(chunks[2], 'ether')),18),
+                    'distributedEthAmount' : round(float(Web3.from_wei(chunks[3], 'ether')),18),
+                    'blockNumber': int(i['blockNumber'],16),
+                    'timeStamp':datetime.fromtimestamp(int(i['timeStamp'],16)),
+                    'logIndex': int(i['logIndex'],16)
                 }
         res.append(report)
 
@@ -33,8 +36,8 @@ def build_report(stats):
              f"- Last TX: {str(stats['last_tx'])} Ago\n\n" \
              f"- AIX processed: {stats['results'][-1]['inputAixAmount']:,.2f}\n" \
              f"- AIX distributed: {stats['results'][-1]['distributedAixAmount']:,.2f}\n" \
-             f"- ETH bought: {Web3.from_wei(int(stats['results'][-1]['swappedEthAmount']), 'ether') :,.4f}\n" \
-             f"- ETH distributed: {Web3.from_wei(int(stats['results'][-1]['distributedEthAmount']), 'ether') :,.4f}\n\n" \
+             f"- ETH bought: {stats['results'][-1]['swappedEthAmount'] :,.4f}\n" \
+             f"- ETH distributed: {stats['results'][-1]['distributedEthAmount'] :,.4f}\n\n" \
              f"👛 Distributor wallet: {stats['distributors_account']}\n" \
              f"💠 Distributor balance: {stats['distributors_balance']} ETH\n\n"
     return report

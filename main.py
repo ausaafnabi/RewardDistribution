@@ -13,7 +13,7 @@ from dotenv import load_dotenv
 from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes
  
-from contract import generate_report
+from contract import generate_report, generate_agg_report
 
 load_dotenv()
 
@@ -27,12 +27,15 @@ logger = logging.getLogger(__name__)
 logger.info('Starting a bot....')
 
 async def help(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    await update.message.reply_text("Hello! Always happy to provide you with Reward Distribution Report! \nUse /start to turn on the service, and /stop to shut it down!")
+    await update.message.reply_text("Hello! Always happy to provide you with Reward Distribution Report!\n\n \nUse /start to turn on the service,\n/aggregatedReport to get combined report, \n/stop to shut it down!")
 
 
 async def report(context: ContextTypes.DEFAULT_TYPE) -> None:
     job = context.job
     await context.bot.send_message(job.chat_id, text=generate_report())
+
+async def aggregatedReport(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    await update.message.reply_text(text=generate_agg_report())
 
 
 def remove_job_if_exists(name: str, context: ContextTypes.DEFAULT_TYPE) -> bool:
@@ -72,6 +75,7 @@ def main() -> None:
     # on different commands - answer in Telegram
     application.add_handler(CommandHandler("help", help))
     application.add_handler(CommandHandler("start", start))
+    application.add_handler(CommandHandler("aggregatedReport", aggregatedReport))
     application.add_handler(CommandHandler("stop", stop))
 
     # Run the bot until the user presses Ctrl-C
