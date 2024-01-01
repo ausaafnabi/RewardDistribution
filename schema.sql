@@ -1,0 +1,13 @@
+CREATE TABLE REWARDS (
+    id SERIAL PRIMARY KEY,
+    tx_hash VARCHAR(1024),
+    log_index INTEGER NOT NULL,
+    block_number BIGINT NOT NULL,
+    timestamp TIMESTAMP WITH TIME ZONE NOT NULL,
+    aix_processed NUMERIC PRECISION 30 SCALE 10 NOT NULL,
+    aix_distributed NUMERIC PRECISION 30 SCALE 10 NOT NULL,
+    eth_bought NUMERIC PRECISION 30 SCALE 10 NOT NULL,
+    eth_distributed NUMERIC PRECISION 30 SCALE 10 NOT NULL,
+    distributor_wallet VARCHAR(1024) NOT NULL,
+    distributor_balance NUMERIC PRECISION 30 SCALE 10 NOT NULL
+);
