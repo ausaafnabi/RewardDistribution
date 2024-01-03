@@ -1,33 +1,41 @@
 from datetime import datetime
 from web3 import Web3
+import datetime as dt
 
-def get_results(data: list)->dict:
+def parse_hexa_amounts(hex_string):
+    n = len(hex_string) // 4  # Chunk length with 4 objects encoded
+    chunks = [int(hex_string[j:j + n], 16) for j in range(0, len(hex_string), n)]
+    return chunks
 
-    first_tx=datetime.fromtimestamp(int(data[0]['timeStamp'],16))
-    last_tx=datetime.fromtimestamp(int(data[-1]['timeStamp'],16))
-    diff1 = datetime.now()-first_tx
-    diff2 = datetime.now()-last_tx
-    print(str(diff2))
-    res=[]
-    for i in data:
-        aix_eth_distibution=i['data'].split('x')[1]
-        n = len(aix_eth_distibution)//4 # chunk length
-        chunks = [int(aix_eth_distibution[j:j+n],16) for j in range(0, len(aix_eth_distibution), n)]
-        report = {  'transactionHash' : i['transactionHash'],
-                    'inputAixAmount' : round(float(Web3.from_wei(chunks[0], 'ether')),18),
-                    'distributedAixAmount' : round(float(Web3.from_wei(chunks[1], 'ether')),18),
-                    'swappedEthAmount' : round(float(Web3.from_wei(chunks[2], 'ether')),18),
-                    'distributedEthAmount' : round(float(Web3.from_wei(chunks[3], 'ether')),18),
-                    'blockNumber': int(i['blockNumber'],16),
-                    'timeStamp':datetime.fromtimestamp(int(i['timeStamp'],16)),
-                    'logIndex': int(i['logIndex'],16)
-                }
-        res.append(report)
+def convert(hex_distribution):
+    return round(float(Web3.from_wei(hex_distribution, 'ether')),18)
 
-    return {'results':res,                    
-            'first_tx': diff1,
-            'last_tx': diff2
+def get_results(data: list) -> dict:
+    now = datetime.now
+    first_tx = now() - dt.timedelta(seconds=int(data[0]['timeStamp'], 16))
+    last_tx = now() - dt.timedelta(seconds=int(data[-1]['timeStamp'], 16))
+    print(f'Last transaction time difference: {last_tx}')
+    results = []
+    for entry in data:
+        hexa_distribution = entry['data'].split('x')[1]
+        distribution_values = parse_hexa_amounts(hexa_distribution)
+        result = {
+            'transactionHash': entry['transactionHash'],
+            'inputAixAmount': convert(distribution_values[0]),
+            'distributedAixAmount': convert(distribution_values[1]),
+            'swappedEthAmount': convert(distribution_values[2]),
+            'distributedEthAmount': convert(distribution_values[3]),
+            'blockNumber': int(entry['blockNumber'],16),
+            'timeStamp':datetime.fromtimestamp(int(entry['timeStamp'],16)),
+            'logIndex': int(entry['logIndex'],16)
         }
+        results.append(result)
+
+    return {
+        'results': results,
+        'first_tx': first_tx,
+        'last_tx': last_tx,
+    }
 
 def build_report(stats):
     
