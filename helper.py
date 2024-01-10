@@ -40,8 +40,8 @@ def get_results(data: list) -> dict:
 def build_report(stats):
     
     report = f"📊 Daily $AIX Stats:\n\n" \
-             f"- First TX: {str(stats['first_tx'])} Ago\n" \
-             f"- Last TX: {str(stats['last_tx'])} Ago\n\n" \
+             f"- First TX: {str(stats['first_tx'].strftime('%Hh%Mm'))} ago\n" \
+             f"- Last TX: {str(stats['last_tx'].strftime('%Hh%Mm'))} ago\n\n" \
              f"- AIX processed: {stats['results'][-1]['inputAixAmount']:,.2f}\n" \
              f"- AIX distributed: {stats['results'][-1]['distributedAixAmount']:,.2f}\n" \
              f"- ETH bought: {stats['results'][-1]['swappedEthAmount'] :,.4f}\n" \

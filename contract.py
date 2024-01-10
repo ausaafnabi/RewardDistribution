@@ -83,7 +83,11 @@ def generate_report():
 
 def generate_agg_report():
     data=get_data_daily_report_aggregated()
-    stats = {'first_tx':data[0],
+    print(data)
+    if None in data:
+        return generate_report()
+    else:
+        stats = {'first_tx':data[0],
              'last_tx':data[1],
              'distributors_account': DISTRIBUTOR_ACCOUNT,
              'distributors_balance': float(get_balance_distributor()),
@@ -93,7 +97,7 @@ def generate_agg_report():
                          'distributedEthAmount':data[5],
                          }]
             }
-    return build_report(stats)
+        return build_report(stats)
 
 #transactions = get_transaction_24h()
-#print(generate_agg_report())
+print(generate_agg_report())
